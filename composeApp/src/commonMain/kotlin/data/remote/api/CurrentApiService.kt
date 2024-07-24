@@ -4,6 +4,7 @@ import domain.CurrencyApiService
 import domain.PreferencesRepository
 import domain.model.ApiResponse
 import domain.model.Currency
+import domain.model.CurrencyCode
 import domain.model.RequestState
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -46,10 +47,20 @@ class CurrencyApiServiceImpl(private val preferences: PreferencesRepository) : C
                 println("API Response: ${response.body<String>()}")
                 val apiResponse = Json.decodeFromString<ApiResponse>(response.body())
 
+                val availableCurrencyCode = apiResponse.data.keys
+                    .filter {
+                        CurrencyCode.entries
+                            .map { code -> code.name }
+                            .contains(it)
+                    }
+                val availableCurrencies = apiResponse.data.values
+                    .filter { currency ->
+                        availableCurrencyCode.contains(currency.code)
+                    }
                 // Persist a timestamp
                 val lastUpdated = apiResponse.meta.lastUpdatedAt
                 preferences.savedLastUpdated(lastUpdated)
-                RequestState.Success(data = apiResponse.data.values.toList())
+                RequestState.Success(data = availableCurrencies)
             } else {
                 RequestState.Error(message = "HTTP Error Code: ${response.status}")
             }
