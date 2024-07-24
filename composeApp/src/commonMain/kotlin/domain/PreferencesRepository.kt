@@ -1,6 +1,6 @@
 package domain
 
 interface PreferencesRepository {
-    fun savedLastUpdated(lastUpdated: String)
-    fun isDataFresh(currentTimestamp: Long): Boolean
+    suspend fun savedLastUpdated(lastUpdated: String)
+    suspend fun isDataFresh(currentTimestamp: Long): Boolean
 }
