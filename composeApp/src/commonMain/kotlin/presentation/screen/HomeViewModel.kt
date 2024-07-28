@@ -7,7 +7,9 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import domain.CurrencyApiService
 import domain.PreferencesRepository
+import domain.model.Currency
 import domain.model.RateStatus
+import domain.model.RequestState
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
@@ -23,18 +25,26 @@ class HomeViewModel(
         mutableStateOf(RateStatus.Idle)
     val rateStatus: State<RateStatus> = _rateStatus
 
+    private var _sourceCurrency:MutableState<RequestState<Currency>> =
+        mutableStateOf(RequestState.Idle)
+    val sourceCurrency: State<RequestState<Currency>> = _sourceCurrency
+
+    private var _targetCurrency: MutableState<RequestState<Currency>> =
+        mutableStateOf(RequestState.Idle)
+    val targetCurrency: State<RequestState<Currency>> = _targetCurrency
+
     init {
         screenModelScope.launch {
             fetchNewRates()
-            getRateStatus()
         }
     }
 
+    // this event fun should be trigger from the ui and will send this event to the view model
     fun sendEvent(event: HomeUiEvent){
         when(event){
             HomeUiEvent.RefreshRates -> {
               screenModelScope.launch {
-                  getRateStatus()
+                  fetchNewRates()
               }
             }
         }
@@ -43,6 +53,7 @@ class HomeViewModel(
     private suspend fun fetchNewRates(){
         try {
             api.getLatestExchangeRates()
+            getRateStatus()
         } catch ( e:Exception){
             println(e.message)
         }

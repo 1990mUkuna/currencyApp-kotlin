@@ -12,7 +12,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @OptIn(ExperimentalSettingsApi::class)
 class PreferencesImpl(
-    private val settings: Settings
+    settings: Settings
 ): PreferencesRepository {
     companion object  {
         const val TIMESTAMP_KEY = "lastUpdated"
@@ -34,11 +34,13 @@ class PreferencesImpl(
             val currentInstant = Instant.fromEpochMilliseconds(currentTimestamp)
             val savedInstant = Instant.fromEpochMilliseconds(savedTimeStamp)
 
-            val currentDateTime = currentInstant.toLocalDateTime(TimeZone.currentSystemDefault())
-            val savedDateTime = savedInstant.toLocalDateTime(TimeZone.currentSystemDefault())
+            val currentDateTime = currentInstant
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+            val savedDateTime = savedInstant
+                .toLocalDateTime(TimeZone.currentSystemDefault())
 
             val daysDifference = currentDateTime.date.dayOfYear - savedDateTime.date.dayOfYear
-            daysDifference > 1
+            daysDifference < 1
         } else false
     }
 }
